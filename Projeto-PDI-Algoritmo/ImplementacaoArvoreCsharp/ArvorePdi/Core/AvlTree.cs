@@ -26,30 +26,37 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
         TransversalPreorder(Root,
                             (node) => 
                             { 
-                               Console.WriteLine($"valor: ${node.Valor} - BF {CalcularBF(node)} --- preorder"); 
+                               Console.WriteLine($"valor: [{node.Valor}] - BF [{CalcularBF(node)}] --- preorder"); 
                             });
+
+        if (!IsBalanceada(Root.Left))
+        {
+            var teste = "náo tá balanceada";
+        }
     }
 
     private void InserirNode(Node<T> nodeAserInserido, Node<T> nodePai)
     {
-        // if (nodePai.Left is null)
-        //     nodePai.Left = nodeAserInserido;
-        // else
-        //     InserirNode(nodeAserInserido, nodePai.Left);
+        var inserirAEsquerda = nodePai.Valor < nodeAserInserido.Valor;
 
-        if(nodePai.Left is null)
-
-        if (nodePai.Valor < nodeAserInserido.Valor)
-            InserirNode(nodeAserInserido, nodePai.Left);
-        else if (nodePai.Valor >= nodeAserInserido.Valor)
-            InserirNode(nodeAserInserido, nodePai.Right);
-        else 
-            throw new ArgumentException("Valor do node invalido, provavelmente a interface IComparisonOperators foi implementada erroneamente");
-        
-        if(!IsBalanceada(Root.Left))
+        if (nodePai.Left is null && inserirAEsquerda)
         {
-            var teste = "náo tá balanceada";
+            nodePai.Left = nodeAserInserido;
+            return;
         }
+
+        var inserirADireita = nodePai.Valor >= nodeAserInserido.Valor;
+
+        if (nodePai.Right is null && inserirADireita)
+        {
+            nodePai.Right = nodeAserInserido;
+            return;
+        }
+
+        if (inserirAEsquerda) InserirNode(nodeAserInserido, nodePai.Left);
+        if (inserirADireita) InserirNode(nodeAserInserido, nodePai.Right);
+        
+        throw new ArgumentException("Valor do node invalido, provavelmente a interface IComparisonOperators foi implementada erroneamente");
     }
 
     public Node<T> Buscar()
