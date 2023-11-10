@@ -29,9 +29,9 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
                                Console.WriteLine($"valor: [{node.Valor}] - BF [{CalcularBF(node)}] --- preorder"); 
                             });
 
-        if (!IsBalanceada(Root.Left))
+        if (!IsBalanceada(Root))
         {
-            var teste = "náo tá balanceada";
+            var teste = "não tá balanceada";
         }
     }
 
@@ -53,10 +53,20 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
             return;
         }
 
-        if (inserirAEsquerda) InserirNode(nodeAserInserido, nodePai.Left);
-        if (inserirADireita) InserirNode(nodeAserInserido, nodePai.Right);
+        if (inserirAEsquerda)
+        {
+            InserirNode(nodeAserInserido, nodePai.Left);
+            return;
+        }
+
+        if (inserirADireita)
+        {
+            InserirNode(nodeAserInserido, nodePai.Right);
+            return;
+        } 
         
-        throw new ArgumentException("Valor do node invalido, provavelmente a interface IComparisonOperators foi implementada erroneamente");
+        throw new ArgumentException($"Valor do node invalido: [{nodeAserInserido.Valor}], provavelmente a interface IComparisonOperators foi implementada erroneamente." +
+                                    $"Argumentos: [{nameof(inserirAEsquerda)}-{inserirAEsquerda}] - [{nameof(inserirADireita)}-{inserirADireita}] - [{nameof(nodePai)}-{nodePai.Valor}].");
     }
 
     public Node<T> Buscar()
@@ -70,7 +80,7 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
 
     private int CalcularBF(Node<T> node) => Height(node.Right) - Height(node.Left);
 
-    private void Rebalancear()
+    private void Balance()
     {
     }
 
