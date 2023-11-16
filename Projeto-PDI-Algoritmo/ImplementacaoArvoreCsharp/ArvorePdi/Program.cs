@@ -4,7 +4,6 @@ using Core;
 Int32 node;
 AvlTree<Int32> arvore = new();
 
-var lista = new List<int>();
 do
 {
     try

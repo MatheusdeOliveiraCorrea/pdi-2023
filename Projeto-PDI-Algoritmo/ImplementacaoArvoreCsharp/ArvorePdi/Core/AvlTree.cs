@@ -29,9 +29,9 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
                                Console.WriteLine($"valor: [{node.Valor}] - BF [{CalcularBF(node)}] --- preorder"); 
                             });
 
-        if (!IsBalanceada(Root))
+        if (!IsBalanceada(Root, out Node<T> nodeASerBalanceado))
         {
-            var teste = "não tá balanceada";
+            Console.WriteLine($"Node desbalanceado: {nodeASerBalanceado?.Valor}");
         }
     }
 
@@ -84,16 +84,25 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
     {
     }
 
-    private bool IsBalanceada(Node<T> node)
+    private bool IsBalanceada(Node<T> node, out Node<T> nodeDesbalanceado)
     {
         var balanceada = true; 
+        Node<T> nodeDesbalanceadoResult = null; 
+
         TransversalPreorder(node, (node) => 
         { 
+            if(balanceada is false) return;
+
             var bf = CalcularBF(node); 
 
             if(bf >= 2 || bf <= -2)
+            {
                 balanceada = false;
+                nodeDesbalanceadoResult = node;
+            }
         });
+
+        nodeDesbalanceado = nodeDesbalanceadoResult;
 
         return balanceada;
     }
