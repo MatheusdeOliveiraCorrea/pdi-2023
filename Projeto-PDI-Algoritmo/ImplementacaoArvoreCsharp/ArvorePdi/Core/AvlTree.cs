@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 
 namespace Core;
@@ -32,12 +31,99 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
         if (!IsBalanceada(Root, out Node<T> nodeASerBalanceado))
         {
             Console.WriteLine($"Node desbalanceado: {nodeASerBalanceado?.Valor}");
+
+            switch (ObterRotacao(nodeASerBalanceado))
+            {
+                case AvlTree<T>.Rotacao.LL:
+                    RotationLL(nodeASerBalanceado);
+                    break;
+                case AvlTree<T>.Rotacao.LR:
+                    RotationLR(nodeASerBalanceado);
+                    break;
+            }
         }
     }
 
+    private Rotacao ObterRotacao(Node<T> nodeASerBalanceado)
+    {
+        var existemNodesLL = nodeASerBalanceado?.Left?.Left is not null;
+
+        if (existemNodesLL)
+        {
+            var segundoNodeABaixo = CalcularBF(nodeASerBalanceado.Left);
+            var terceiroNodeABaixo = CalcularBF(nodeASerBalanceado.Left.Left);
+
+            bool[] condicoesParaSerLL =
+            {
+                segundoNodeABaixo == 1,
+                terceiroNodeABaixo == 2
+            };
+
+            if(condicoesParaSerLL.All(a => true))
+                return Rotacao.LL;
+        }
+
+        var existemNodesLR = nodeASerBalanceado?.Left?.Right is not null;
+
+        if (existemNodesLR)
+        {
+            var segundoNodeABaixo = CalcularBF(nodeASerBalanceado.Left);
+            var terceiroNodeABaixo = CalcularBF(nodeASerBalanceado.Left.Right);
+
+            bool[] condicoesParaSerLR =
+            {
+                segundoNodeABaixo == -1,
+                terceiroNodeABaixo == 0
+            };
+
+            if(condicoesParaSerLR.All(a => true))
+                return Rotacao.LR;
+        }
+
+        throw new NotImplementedException("aaaaaaaaaaa");
+    }
+
+    private void RotationLL(Node<T> nodeASerBalanceado)
+    {
+        if (nodeASerBalanceado == Root)
+            Root = nodeASerBalanceado.Left;
+
+        nodeASerBalanceado.Left.Right = new Node<T>(nodeASerBalanceado.Valor)
+        {
+            Left = nodeASerBalanceado.Left.Right,
+            Right = nodeASerBalanceado.Right
+        };
+    }
+
+    private void RotationLR(Node<T> nodeASerBalanceado)
+    {
+        var nodeAEsquerdaParaBalancear = new Node<T>
+        {
+            Left = new Node<T> 
+            { 
+                Left = nodeASerBalanceado.Left.Left,  //subtree
+                Valor = nodeASerBalanceado.Left.Valor,
+                Right = nodeASerBalanceado.Left.Right.Left //subtree
+            },
+            Valor = nodeASerBalanceado.Left.Right.Valor,
+            Right = nodeASerBalanceado.Left.Right.Right
+        };
+
+        nodeASerBalanceado.Left = nodeAEsquerdaParaBalancear; 
+
+        RotationLL(nodeASerBalanceado);
+    }
+
+    private Node<T> NovoNode(T valor, Node<T> leftSubTree, Node<T> rightSubTree) => new Node<T> 
+    { 
+        Left = leftSubTree is null ? null : new Node<T>(leftSubTree.Valor) { Left = leftSubTree.Left, Right = leftSubTree.Right },
+        Valor = valor,
+        Right = rightSubTree is null ? null : new Node<T>(rightSubTree.Valor) { Left = rightSubTree.Left, Right = rightSubTree.Right }
+    };
+
     private void InserirNode(Node<T> nodeAserInserido, Node<T> nodePai)
     {
-        var inserirAEsquerda = nodePai.Valor < nodeAserInserido.Valor;
+        var inserirAEsquerda = nodePai.Valor > nodeAserInserido.Valor;
 
         if (nodePai.Left is null && inserirAEsquerda)
         {
@@ -45,7 +131,7 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
             return;
         }
 
-        var inserirADireita = nodePai.Valor >= nodeAserInserido.Valor;
+        var inserirADireita = nodePai.Valor <= nodeAserInserido.Valor;
 
         if (nodePai.Right is null && inserirADireita)
         {
@@ -91,8 +177,6 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
 
         TransversalPreorder(node, (node) => 
         { 
-            if(balanceada is false) return;
-
             var bf = CalcularBF(node); 
 
             if(bf >= 2 || bf <= -2)
@@ -133,5 +217,11 @@ public class AvlTree<T> : IArvoreBinaria<T> where T : struct, IComparisonOperato
     {
         public const int MinimumHeight = 1;
         public const int Unexistent = 0;
+    }
+
+    private enum Rotacao
+    {
+        LL,
+        LR
     }
 }
